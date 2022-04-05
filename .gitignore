@@ -4,6 +4,7 @@
 
 # Session Data files
 .RData
+.motus
 
 # User-specific files
 .Ruserdata
