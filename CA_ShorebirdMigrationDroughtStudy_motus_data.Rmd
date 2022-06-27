@@ -14,9 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 install.packages("motus", 
                  repos = c(birdscanada = 'https://birdscanada.r-universe.dev',
                            CRAN = 'https://cloud.r-project.org'))
-# if individual package fail
+
+# If individual package fail
 install.packages("crayon")
 install.packages("assertthat")
+install.packages("cpp11")
+install.packages("jsonlite")
+
+# If this still fails you can do this and rerun
+options(timeout = max(1000, getOption("timeout")))
+
 ```
 
 ## MotusRBook
