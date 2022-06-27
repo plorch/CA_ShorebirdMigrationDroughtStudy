@@ -8,6 +8,16 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Rmotus package install
+
+```{r}
+install.packages("motus", 
+                 repos = c(birdscanada = 'https://birdscanada.r-universe.dev',
+                           CRAN = 'https://cloud.r-project.org'))
+# if individual package fail
+install.packages("crayon")
+install.packages("assertthat")
+```
 
 ## MotusRBook
 
