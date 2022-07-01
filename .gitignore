@@ -3,8 +3,8 @@
 .Rapp.history
 
 # Session Data files
-.RData
-.motus
+*.RData
+*.motus
 
 # User-specific files
 .Ruserdata
