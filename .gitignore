@@ -38,3 +38,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Output files
+/Output
+
+# Input files for testing (mostly kmls)
+/TagTesting

@@ -76,7 +76,6 @@ You can update individual sql files or all at once.
 proj.458.sql.motus <- tagme(projRecv = 458, new = FALSE, update = TRUE)
 
 # California-Shorebird Migration and Drought Study
-# Needs to be expanded
 rec.458.names = paste0(c("cosumnes", "merced", "staten",
                      "colusa", "sacramento", "montna",
                      "conaway","napasonoma", "birdhaven",  
@@ -110,15 +109,123 @@ for (k in 1:length(df.458.serno)) {
 # }
 
 # All at once for all of your projects
-### Beware this will take a really long tims
+### Beware this will take a really long time
 # tagme()
 
 # This will get data on all projects and receiver deployments
 ## Access this in recDeps table in proj.projnum.sql.motus
 metadata(proj.458.sql.motus, projectIDs = 458)
 
+# Work with one receiver
+#  After running tagme for one of the names in the list above
+# tagme(projRecv = df.458.serno[8], new = TRUE, update = TRUE)
+# Connect to external .motus file without updating
+# napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = F)
+napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = T)
+# Get table and fix datetimes
+tbl.napa.sonoma.alltags <- tbl(napa.sonoma.motus, "alltags")
+df.napa.sonoma.alltags <- tbl.napa.sonoma.alltags %>% 
+  collect() %>% 
+  as.data.frame() %>%     # for all fields in the df (data frame)
+  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+
+
 motusLogout()
 ```
+## Tag detection range testing
+
+For this we need to decide which signal strengths to associate with which coordinates.
+For now we use nearest point in time.
+Uses code example here:
+https://stackoverflow.com/questions/70974563/r-merge-two-data-frames-based-on-nearest-date-and-time-match
+
+Note most detections were on antenna aimed East (95 true, 108 magnetic) since all the land is North and East of the station.
+
+```{r range}
+library(rgdal)
+library(lubridate)
+
+points.boat = readOGR("TagTesting/LEVI_TAG_CHECK_TRACK.kml", "Points")
+points = readOGR("TagTesting/LEVI LAND CHECK 6-30.kml", "Points")
+# This does not seem useful, since time domain data is not stored, afaik
+points.gpx = readOGR("TagTesting/LEVI LAND CHECK.gpx", "track_points")
+
+# Create datetime from end and store in blank timestamp field
+points.boat@data = points.boat@data %>%
+  mutate(timestamp = as_datetime(end, tz = "UTC"))
+range(points.boat@data$timestamp)
+
+points@data = points@data %>%
+  mutate(timestamp = as_datetime(end, tz = "UTC"))
+range(points@data$timestamp)
+
+# Filter down to test tag and day(s) of test
+df.alltags.149052 = df.napa.sonoma.alltags %>%
+  filter(motusTagID == 49052,
+         ts > "2022-06-29",
+         ts < "2022-07-01")
+
+# Plot signal strength colored by antenna
+
+p.sig  = df.alltags.149052 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+p.sig
+
+# merge in signal strength from Motus records closest in time
+points@data$tmp = round_date(points@data$timestamp, "minute")
+df.alltags.149052$tmp = round_date(df.alltags.149052$ts, "minute")
+
+points@data$grp = 1:nrow(points@data)
+
+points.merged = merge(points@data, df.alltags.149052, "tmp") 
+points.merged.nearest = points.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, Name, description, drawOrder, icon, ts, tsCorrected, sigsd,
+            noise, freq, freqsd, slop, burstSlop, tagProjID, mfgID, tagType, 
+            codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, pulseLen,
+            tagDeployID, speciesID, markerNumber, markerType , tagDeployStart,
+            tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, tagDepComments,
+            tagDeployTest, fullID))
+points = merge(points, points.merged.nearest, "grp")
+plot(points)
+```
+## Leaflet map to examine data
+
+```{r maptesttag}
+library(leaflet)
+
+pal <- colorNumeric(
+  palette = "Reds",
+  domain = points$sig)
+
+icons <- awesomeIcons(
+  icon = 'color-wand-outline',#'ios-close' 'wifi-sharp'
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = ifelse(is.na(points$sig),"#d9d9d9",pal(points$sig))
+)
+
+
+leaflet(points) %>%
+  addTiles() %>%
+  addProviderTiles('Esri.WorldImagery') %>%
+  # addMarkers()
+  # This only produced one color
+  # addAwesomeMarkers(icon=icons, label=~as.character(sig))
+  addCircleMarkers(color = ifelse(is.na(points$sig),"#737373",pal(points$sig)),
+                   radius = ifelse(is.na(points$sig), 2, 10),
+                   popup = ~as.character(points$sig), 
+                   label = ~as.character(points$sig))
+
+```
+
 
 ## Accessing tables
 
@@ -143,12 +250,12 @@ proj.458.sql.motus = tagme(458, update = FALSE)
 tbl.458.alltags <- tbl(proj.458.sql.motus, "alltags")
 # Filter the data
 # This is a filtered table with over 3 million observations
-tbl.458.TRBL <- tbl(proj.458.sql.motus, "alltags") %>%
-  filter(speciesEN == "Tricolored Blackbird") %>%
+# Last time I tried this it failed after a long time
+tbl.458.DUNL <- tbl(proj.458.sql.motus, "alltags") %>%
+  filter(speciesEN == "Dunlin") %>%
   collect()
-
 # Get the daily median location of GPS points for these data
-TRBL.GPS <- getGPS(src = proj.458.sql.motus, data = tbl.458.TRBL)
+DUNL.GPS <- getGPS(src = proj.458.sql.motus, data = tbl.458.DUNL)
 
 # Get flat table
 # df.458.alltags <- tbl.458.alltags %>% 
@@ -164,12 +271,12 @@ df.458.alltags <- tbl.458.alltags %>%
 
 # Remove old variables without project numbers in them below here
 
-df.alltags.458.01_22 = df.458.alltags
 # export as RDS to preserve dateTimes
 # You can then just import this to work with tag data from before the date of export
-saveRDS(df.alltags.458.01_22, "df_alltags_458.01_22.rds")
+#STOPPED HERE 6/28/22
+saveRDS(df.458.alltags, "df_alltags_458.06_22.rds")
 # To read it back in
-# df.alltags.458.01_22 <- readRDS("df_alltags_458.01_22.rds")
+# df.alltags.458.06_22 <- readRDS("df_alltags_458.06_22.rds")
 ```
 
 ## Tag Deployments
