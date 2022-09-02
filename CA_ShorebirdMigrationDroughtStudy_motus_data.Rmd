@@ -123,6 +123,10 @@ metadata(proj.458.sql.motus, projectIDs = 458)
 # napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = F)
 napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = T)
 pixley.motus = tagme("CTT-140682CCEB52", update = T)
+kern.motus = tagme("CTT-8F11AA6622E1", update = T)
+cosumnes.motus = tagme("CTT-D00F694B4918", update = T)
+colusa.motus = tagme("CTT-9697596E76D6", update = T)
+birdhaven.motus = tagme("CTT-F51A7C862D57", update = T)
 
 # Get table and fix datetimes
 tbl.napa.sonoma.alltags <- tbl(napa.sonoma.motus, "alltags")
