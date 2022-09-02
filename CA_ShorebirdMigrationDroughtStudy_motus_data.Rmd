@@ -214,15 +214,20 @@ icons <- awesomeIcons(
 
 
 leaflet(points) %>%
-  addTiles() %>%
-  addProviderTiles('Esri.WorldImagery') %>%
+  addTiles(group ="OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery', group = "World Imagery") %>%
   # addMarkers()
   # This only produced one color
   # addAwesomeMarkers(icon=icons, label=~as.character(sig))
   addCircleMarkers(color = ifelse(is.na(points$sig),"#737373",pal(points$sig)),
                    radius = ifelse(is.na(points$sig), 2, 10),
                    popup = ~as.character(points$sig), 
-                   label = ~as.character(points$sig))
+                   label = ~as.character(points$sig),
+                   group = "Signal Strength") %>%
+  addLayersControl(
+    baseGroups = c("OSM (default)", "World Imagery"),
+    overlayGroups = c("Signal Strength"),
+    options = layersControlOptions(collapsed = FALSE))
 
 ```
 
