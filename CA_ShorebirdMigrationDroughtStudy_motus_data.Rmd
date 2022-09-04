@@ -82,26 +82,26 @@ rec.458.names = paste0(c("cosumnes", "merced", "staten",
                      "pixley", "kern", "dangermond"), ".sql.motus")
 
 # Individually
-# Do 10-12 for TNC
-rec.458.names[1] <- tagme(projRecv = df.458.serno[1], new = TRUE, update = TRUE)
-rec.458.names[2] <- tagme(projRecv = df.458.serno[2], new = TRUE, update = TRUE)
-rec.458.names[3] <- tagme(projRecv = df.458.serno[3], new = TRUE, update = TRUE)
-rec.458.names[4] <- tagme(projRecv = df.458.serno[4], new = TRUE, update = TRUE)
-rec.458.names[5] <- tagme(projRecv = df.458.serno[5], new = TRUE, update = TRUE)
-rec.458.names[6] <- tagme(projRecv = df.458.serno[6], new = TRUE, update = TRUE)
-rec.458.names[7] <- tagme(projRecv = df.458.serno[7], new = TRUE, update = TRUE)
-rec.458.names[8] <- tagme(projRecv = df.458.serno[8], new = TRUE, update = TRUE)
-rec.458.names[9] <- tagme(projRecv = df.458.serno[9], new = TRUE, update = TRUE)
-rec.458.names[10] <- tagme(projRecv = df.458.serno[10], new = TRUE, update = TRUE)
-rec.458.names[11] <- tagme(projRecv = df.458.serno[11], new = TRUE, update = TRUE)
-rec.458.names[12] <- tagme(projRecv = df.458.serno[12], new = TRUE, update = TRUE)
+# Depricated for codewith station name below
+# rec.458.names[1] <- tagme(projRecv = df.458.serno[1], new = TRUE, update = TRUE)
+# rec.458.names[2] <- tagme(projRecv = df.458.serno[2], new = TRUE, update = TRUE)
+# rec.458.names[3] <- tagme(projRecv = df.458.serno[3], new = TRUE, update = TRUE)
+# rec.458.names[4] <- tagme(projRecv = df.458.serno[4], new = TRUE, update = TRUE)
+# rec.458.names[5] <- tagme(projRecv = df.458.serno[5], new = TRUE, update = TRUE)
+# rec.458.names[6] <- tagme(projRecv = df.458.serno[6], new = TRUE, update = TRUE)
+# rec.458.names[7] <- tagme(projRecv = df.458.serno[7], new = TRUE, update = TRUE)
+# rec.458.names[8] <- tagme(projRecv = df.458.serno[8], new = TRUE, update = TRUE)
+# rec.458.names[9] <- tagme(projRecv = df.458.serno[9], new = TRUE, update = TRUE)
+# rec.458.names[10] <- tagme(projRecv = df.458.serno[10], new = TRUE, update = TRUE)
+# rec.458.names[11] <- tagme(projRecv = df.458.serno[11], new = TRUE, update = TRUE)
+# rec.458.names[12] <- tagme(projRecv = df.458.serno[12], new = TRUE, update = TRUE)
 # Got 6 TNC stations done on first run
 
 # All at once with variable assignment so it is comparable to the individual way
 # TNC
-for (k in 1:length(df.458.serno)) {
-  assign(rec.458.names[k], tagme(df.458.serno[k], update = TRUE))
-}
+# for (k in 1:length(df.458.serno)) {
+#   assign(rec.458.names[k], tagme(df.458.serno[k], update = TRUE))
+# }
 
 # All at once without varialbe assignment
 # for (k in 1:length(df.serno)) {
@@ -124,15 +124,39 @@ metadata(proj.458.sql.motus, projectIDs = 458)
 napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = T)
 pixley.motus = tagme("CTT-140682CCEB52", update = T)
 kern.motus = tagme("CTT-8F11AA6622E1", update = T)
-cosumnes.motus = tagme("CTT-D00F694B4918", update = T)
-colusa.motus = tagme("CTT-9697596E76D6", update = T)
-birdhaven.motus = tagme("CTT-F51A7C862D57", update = T)
+cosumnes.motus = tagme("CTT-D00F694B4918", new=TRUE, update = T)
+colusa.motus = tagme("CTT-9697596E76D6",  new=TRUE, update = T)
+birdhaven.motus = tagme("CTT-F51A7C862D57",  new=TRUE, update = T)
 
 # Get table and fix datetimes
 tbl.napa.sonoma.alltags <- tbl(napa.sonoma.motus, "alltags")
 tbl.pixley.alltags <- tbl(pixley.motus, "alltags")
+tbl.kern.alltags <- tbl(kern.motus, "alltags")
+tbl.cosumnes.alltags <- tbl(cosumnes.motus, "alltags")
+tbl.colusa.alltags <- tbl(colusa.motus, "alltags")
+tbl.birdhaven.alltags <- tbl(birdhaven.motus, "alltags")
 
-df.napa.sonoma.alltags <- tbl.napa.sonoma.alltags %>% 
+# df.napa.sonoma.alltags <- tbl.napa.sonoma.alltags %>% 
+#   collect() %>% 
+#   as.data.frame() %>%     # for all fields in the df (data frame)
+#   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+df.pixley.alltags <- tbl.pixley.alltags %>% 
+  collect() %>% 
+  as.data.frame() %>%     # for all fields in the df (data frame)
+  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+df.pixley.alltags <- tbl.pixley.alltags %>% 
+  collect() %>% 
+  as.data.frame() %>%     # for all fields in the df (data frame)
+  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+df.pixley.alltags <- tbl.pixley.alltags %>% 
+  collect() %>% 
+  as.data.frame() %>%     # for all fields in the df (data frame)
+  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+df.pixley.alltags <- tbl.pixley.alltags %>% 
+  collect() %>% 
+  as.data.frame() %>%     # for all fields in the df (data frame)
+  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
+df.pixley.alltags <- tbl.pixley.alltags %>% 
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
@@ -158,27 +182,56 @@ Note most napa.sonoma detections were on antenna aimed East (95 true, 108 magnet
 library(rgdal)
 library(lubridate)
 library(ggplot2)
+library(dplyr)
 
-points.boat = readOGR("TagTesting/LEVI_TAG_CHECK_TRACK.kml", "Points")
-points = readOGR("TagTesting/LEVI LAND CHECK 6-30.kml", "Points")
-points.pixley = readOGR("TagTesting/PixleyTrackCaltopo.kml", "Points")
+# points.boat = readOGR("TagTesting/LEVI_TAG_CHECK_TRACK.kml", "Points")
+# points.kml = readOGR("TagTesting/LEVI LAND CHECK 6-30.kml", "trk")
+# points.pixley = readOGR("TagTesting/PixleyTrackCaltopo.kml", "Points")
 # The kml does not seem useful, since time domain data is not stored, afaik
-points.gpx = readOGR("TagTesting/LEVI LAND CHECK.gpx", "track_points")
+## Don't know why this does not work now
+# points.sonoma.gpx = readOGR("TagTesting/LEVI LAND CHECK.gpx", "track_points")
 points.pixley.gpx = readOGR("TagTesting/PixleyTrackCaltopo.gpx", "track_points")
+points.kernNW.gpx = readOGR("TagTesting/Kern NW Test.gpx", "track_points")
+points.kernNWR.gpx = readOGR("TagTesting/Kern NWR Test.gpx", "track_points")
+points.cosumnes.gpx = readOGR("TagTesting/Cosumnes Track 72722.gpx", "track_points")
+points.colusa.gpx = readOGR("TagTesting/Colusa Motus Test 81822.gpx", "track_points")
+points.birdhaven.gpx = readOGR("TagTesting/BirdHaven Motus Test 81822.gpx", "track_points")
 
 
 # Create datetime from end and store in blank timestamp field
-points.boat@data = points.boat@data %>%
-  mutate(timestamp = as_datetime(end, tz = "UTC"))
-range(points.boat@data$timestamp)
+## Boat tag did not get picked up
+# points.boat@data = points.boat@data %>%
+#   mutate(timestamp = as_datetime(end, tz = "UTC"))
+# range(points.boat@data$timestamp)
 
-points@data = points@data %>%
-  mutate(timestamp = as_datetime(end, tz = "UTC"))
-range(points@data$timestamp)
+# points.sonoma.gpx@data = points.sonoma.gpx@data %>%
+#   mutate(timestamp = as_datetime(end, tz = "UTC"))
+# range(points.sonoma.gpx@data$timestamp)
 
 points.pixley.gpx@data = points.pixley.gpx@data %>%
   mutate(timestamp = as_datetime(time, tz = "UTC"))
 range(points.pixley.gpx@data$timestamp)
+
+points.kernNW.gpx@data = points.kernNW.gpx@data %>%
+  mutate(timestamp = as_datetime(time, tz = "UTC"))
+range(points.kernNW.gpx@data$timestamp)
+
+points.kernNWR.gpx@data = points.kernNWR.gpx@data %>%
+  mutate(timestamp = as_datetime(time, tz = "UTC"))
+range(points.kernNWR.gpx@data$timestamp)
+
+points.cosumnes.gpx@data = points.cosumnes.gpx@data %>%
+  mutate(timestamp = as_datetime(time, tz = "UTC"))
+range(points.cosumnes.gpx@data$timestamp)
+
+points.colusa.gpx@data = points.colusa.gpx@data %>%
+  mutate(timestamp = as_datetime(time, tz = "UTC"))
+range(points.colusa.gpx@data$timestamp)
+
+points.birdhaven.gpx@data = points.birdhaven.gpx@data %>%
+  mutate(timestamp = as_datetime(time, tz = "UTC"))
+range(points.birdhaven.gpx@data$timestamp)
+
 
 # Filter down to test tag and day(s) of test
 df.alltags.149052 = df.napa.sonoma.alltags %>%
@@ -194,8 +247,10 @@ df.pixley.alltags.57234 = df.pixley.alltags %>%
          ts > "2022-07-12",
          ts < "2022-07-15")
 
+
 # Plot signal strength colored by antenna
 
+## napa.sonoma
 p.sig  = df.alltags.149052 %>% 
   ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
   theme_bw() + 
@@ -204,22 +259,29 @@ p.sig  = df.alltags.149052 %>%
   scale_color_discrete(name = "Antenna bearing") +
   facet_grid(recvDeployName ~ .)
 p.sig
-pixley.sig  = df.pixley.alltags.56719 %>% 
+## Pixley
+pixley.56719.sig  = df.pixley.alltags.56719 %>% 
   ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
   theme_bw() + 
   geom_point() + 
   labs(x = "Time of day", y = "Signal strength") +
   scale_color_discrete(name = "Antenna bearing") +
   facet_grid(recvDeployName ~ .)
-pixley.sig
-pixley.sig  = df.pixley.alltags.57234 %>% 
+pixley.56719.sig
+pixley.57234.sig  = df.pixley.alltags.57234 %>% 
   ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
   theme_bw() + 
   geom_point() + 
   labs(x = "Time of day", y = "Signal strength") +
   scale_color_discrete(name = "Antenna bearing") +
   facet_grid(recvDeployName ~ .)
-pixley.sig
+pixley.57234.sig
+ 
+# Cosumnes Life Tag 2D342D78, Hybrid Tag 612A072A
+# Colusa single Hybrid tag #612A072A
+# Birdhaven single Hybrid tag #612A072A
+
+
 
 # merge in signal strength from Motus records closest in time
 points@data$tmp = round_date(points@data$timestamp, "minute")
