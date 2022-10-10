@@ -121,12 +121,22 @@ metadata(proj.458.sql.motus, projectIDs = 458)
 # tagme(projRecv = df.458.serno[8], new = TRUE, update = TRUE)
 # Connect to external .motus file without updating
 # napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = F)
-napa.sonoma.motus = tagme("CTT-21FFFAC8B255", update = T)
-pixley.motus = tagme("CTT-140682CCEB52", update = T)
-kern.motus = tagme("CTT-8F11AA6622E1", update = T)
+napa.sonoma.motus = tagme("CTT-21FFFAC8B255", new=TRUE, update = T)
+pixley.motus = tagme("CTT-140682CCEB52", new=TRUE, update = T)
+kern.motus = tagme("CTT-8F11AA6622E1", new=TRUE, update = T)
 cosumnes.motus = tagme("CTT-D00F694B4918", new=TRUE, update = T)
 colusa.motus = tagme("CTT-9697596E76D6",  new=TRUE, update = T)
 birdhaven.motus = tagme("CTT-F51A7C862D57",  new=TRUE, update = T)
+
+# To work with existing sqlite databases
+napa.sonoma.motus = tagme("CTT-21FFFAC8B255", new=FALSE, update = FALSE)
+pixley.motus = tagme("CTT-140682CCEB52", new=FALSE, update = FALSE)
+kern.motus = tagme("CTT-8F11AA6622E1", new=FALSE, update = FALSE)
+cosumnes.motus = tagme("CTT-D00F694B4918", new=FALSE, update = FALSE)
+colusa.motus = tagme("CTT-9697596E76D6",  new=FALSE, update = FALSE)
+birdhaven.motus = tagme("CTT-F51A7C862D57",  new=FALSE, update = FALSE)
+
+
 
 # Get table and fix datetimes
 tbl.napa.sonoma.alltags <- tbl(napa.sonoma.motus, "alltags")
@@ -144,23 +154,19 @@ df.pixley.alltags <- tbl.pixley.alltags %>%
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
-df.pixley.alltags <- tbl.pixley.alltags %>% 
+df.kern.alltags <- tbl.kern.alltags %>% 
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
-df.pixley.alltags <- tbl.pixley.alltags %>% 
+df.cosumnes.alltags <- tbl.cosumnes.alltags %>% 
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
-df.pixley.alltags <- tbl.pixley.alltags %>% 
+df.colusa.alltags <- tbl.colusa.alltags %>% 
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
-df.pixley.alltags <- tbl.pixley.alltags %>% 
-  collect() %>% 
-  as.data.frame() %>%     # for all fields in the df (data frame)
-  mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
-df.pixley.alltags <- tbl.pixley.alltags %>% 
+df.birdhaven.alltags <- tbl.birdhaven.alltags %>% 
   collect() %>% 
   as.data.frame() %>%     # for all fields in the df (data frame)
   mutate(ts = as_datetime(ts, tz = "UTC", origin = "1970-01-01"))
@@ -183,6 +189,7 @@ library(rgdal)
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+library(motus)
 
 # points.boat = readOGR("TagTesting/LEVI_TAG_CHECK_TRACK.kml", "Points")
 # points.kml = readOGR("TagTesting/LEVI LAND CHECK 6-30.kml", "trk")
@@ -190,6 +197,7 @@ library(dplyr)
 # The kml does not seem useful, since time domain data is not stored, afaik
 ## Don't know why this does not work now
 # points.sonoma.gpx = readOGR("TagTesting/LEVI LAND CHECK.gpx", "track_points")
+# I think Rodd did not track at Pixley, but we were together
 points.pixley.gpx = readOGR("TagTesting/PixleyTrackCaltopo.gpx", "track_points")
 points.kernNW.gpx = readOGR("TagTesting/Kern NW Test.gpx", "track_points")
 points.kernNWR.gpx = readOGR("TagTesting/Kern NWR Test.gpx", "track_points")
@@ -232,12 +240,20 @@ points.birdhaven.gpx@data = points.birdhaven.gpx@data %>%
   mutate(timestamp = as_datetime(time, tz = "UTC"))
 range(points.birdhaven.gpx@data$timestamp)
 
+# Cosumnes Life Tag 2D342D78, Hybrid Tag 612A072A
+# Colusa single Hybrid tag #612A072A
+# Birdhaven single Hybrid tag #612A072A
+# I got these from Motus website https://motus.org/data/project/tags
+mfg_tag_id_tnc = c("2D342D78", "612A072A") # Rodd's test tags
+motus_tag_id_tnc = c(57234, 58286)
+tag_model_tnc = c("LifeTag", "HybridTag")
 
 # Filter down to test tag and day(s) of test
 df.alltags.149052 = df.napa.sonoma.alltags %>%
   filter(motusTagID == 49052,
          ts > "2022-06-29",
          ts < "2022-07-01")
+
 df.pixley.alltags.56719 = df.pixley.alltags %>%
   filter(motusTagID == 56719,
          ts > "2022-07-12",
@@ -246,6 +262,36 @@ df.pixley.alltags.57234 = df.pixley.alltags %>%
   filter(motusTagID == 57234,
          ts > "2022-07-12",
          ts < "2022-07-15")
+
+# Pat tested, Rodd?
+df.kern.alltags.56719 = df.kern.alltags %>%
+  filter(motusTagID == 56719,
+         ts > "2022-07-12",
+         ts < "2022-07-15")
+
+# Rodd only, LifeTag
+df.cosumnes.alltags.57234 = df.cosumnes.alltags %>%
+  filter(motusTagID == 57234,
+         ts > "2022-07-26",
+         ts < "2022-07-28")
+# Rodd only, HybridTag
+df.cosumnes.alltags.58286 = df.cosumnes.alltags %>%
+  filter(motusTagID == 58286,
+         ts > "2022-07-26",
+         ts < "2022-07-28")
+
+# Rodd only, HybridTag
+df.colusa.alltags.58286 = df.colusa.alltags %>%
+  filter(motusTagID == 58286,
+         ts > "2022-08-17",
+         ts < "2022-08-19")
+
+# Rodd only, HybridTag
+df.birdhaven.alltags.58286 = df.birdhaven.alltags %>%
+  filter(motusTagID == 58286,
+         ts > "2022-08-17",
+         ts < "2022-08-19")
+
 
 
 # Plot signal strength colored by antenna
@@ -276,25 +322,80 @@ pixley.57234.sig  = df.pixley.alltags.57234 %>%
   scale_color_discrete(name = "Antenna bearing") +
   facet_grid(recvDeployName ~ .)
 pixley.57234.sig
- 
-# Cosumnes Life Tag 2D342D78, Hybrid Tag 612A072A
-# Colusa single Hybrid tag #612A072A
-# Birdhaven single Hybrid tag #612A072A
+## Kern
+kern.56719.sig  = df.kern.alltags.56719 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+kern.56719.sig
+## Cosumnes 
+cosumnes.57234.sig  = df.cosumnes.alltags.57234 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+cosumnes.57234.sig
+cosumnes.58286.sig  = df.cosumnes.alltags.58286 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+cosumnes.58286.sig
+## Colusa
+colusa.58286.sig  = df.colusa.alltags.58286 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+colusa.58286.sig
+## Birdhaven
+birdhaven.58286.sig  = df.birdhaven.alltags.58286 %>% 
+  ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
+  theme_bw() + 
+  geom_point() + 
+  labs(x = "Time of day", y = "Signal strength") +
+  scale_color_discrete(name = "Antenna bearing") +
+  facet_grid(recvDeployName ~ .)
+birdhaven.58286.sig
 
 
-
-# merge in signal strength from Motus records closest in time
+# Merge in signal strength from Motus records closest in time
+## Get minute
 points@data$tmp = round_date(points@data$timestamp, "minute")
 df.alltags.149052$tmp = round_date(df.alltags.149052$ts, "minute")
-
 points.pixley.gpx@data$tmp = round_date(points.pixley.gpx@data$timestamp, "minute")
 df.pixley.alltags.56719$tmp = round_date(df.pixley.alltags.56719$ts, "minute")
 df.pixley.alltags.57234$tmp = round_date(df.pixley.alltags.57234$ts, "minute")
+points.kernNW.gpx@data$tmp = round_date(points.kernNW.gpx@data$timestamp, "minute")
+df.kern.alltags.56719$tmp = round_date(df.kern.alltags.56719$ts, "minute")
+points.kernNWR.gpx@data$tmp = round_date(points.kernNWR.gpx@data$timestamp, "minute")
+points.cosumnes.gpx@data$tmp = round_date(points.cosumnes.gpx@data$timestamp, "minute")
+df.cosumnes.alltags.57234$tmp = round_date(df.cosumnes.alltags.57234$ts, "minute")
+df.cosumnes.alltags.58286$tmp = round_date(df.cosumnes.alltags.58286$ts, "minute")
+points.colusa.gpx@data$tmp = round_date(points.colusa.gpx@data$timestamp, "minute")
+df.colusa.alltags.58286$tmp = round_date(df.colusa.alltags.58286$ts, "minute")
+points.birdhaven.gpx@data$tmp = round_date(points.birdhaven.gpx@data$timestamp, "minute")
+df.birdhaven.alltags.58286$tmp = round_date(df.birdhaven.alltags.58286$ts, "minute")
 
+## Add group
 points@data$grp = 1:nrow(points@data)
-
 points.pixley.gpx@data$grp = 1:nrow(points.pixley.gpx@data)
+points.kernNW.gpx@data$grp = 1:nrow(points.kernNW.gpx@data)
+points.kernNWR.gpx@data$grp = 1:nrow(points.kernNWR.gpx@data)
+points.cosumnes.gpx@data$grp = 1:nrow(points.cosumnes.gpx@data)
+points.colusa.gpx@data$grp = 1:nrow(points.colusa.gpx@data)
+points.birdhaven.gpx@data$grp = 1:nrow(points.birdhaven.gpx@data)
 
+## Merge
 points.merged = merge(points@data, df.alltags.149052, "tmp") 
 points.merged.nearest = points.merged %>%
   group_by(grp) %>% 
@@ -309,8 +410,8 @@ points.merged.nearest = points.merged %>%
 points = merge(points, points.merged.nearest, "grp")
 plot(points)
 
-points.pixley.merged = merge(points.pixley.gpx@data, df.pixley.alltags.56719, "tmp") 
-points.pixley.merged.nearest = points.pixley.merged %>%
+points.pixley.56719.merged = merge(points.pixley.gpx@data, df.pixley.alltags.56719, "tmp") 
+points.pixley.56719.merged.nearest = points.pixley.56719.merged %>%
   group_by(grp) %>% 
   slice(which.min(abs(difftime(timestamp, ts)))) %>% 
   ungroup() %>% 
@@ -323,11 +424,11 @@ points.pixley.merged.nearest = points.pixley.merged %>%
             pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
             tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
             tagDepComments, tagDeployTest, fullID))
-points.pixley = merge(points.pixley.gpx, points.pixley.merged.nearest, "grp")
-plot(points.pixley)
+points.pixley.56719 = merge(points.pixley.gpx, points.pixley.56719.merged.nearest, "grp")
+plot(points.pixley.56719)
 
-points.pixley.merged = merge(points.pixley.gpx@data, df.pixley.alltags.57234, "tmp") 
-points.pixley.merged.nearest = points.pixley.merged %>%
+points.pixley.57234.merged = merge(points.pixley.gpx@data, df.pixley.alltags.57234, "tmp") 
+points.pixley.57234.merged.nearest = points.pixley.57234.merged %>%
   group_by(grp) %>% 
   slice(which.min(abs(difftime(timestamp, ts)))) %>% 
   ungroup() %>% 
@@ -340,65 +441,254 @@ points.pixley.merged.nearest = points.pixley.merged %>%
             pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
             tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
             tagDepComments, tagDeployTest, fullID))
-points.pixley = merge(points.pixley.gpx, points.pixley.merged.nearest, "grp")
-plot(points.pixley)
+points.pixley.57234 = merge(points.pixley.gpx, points.pixley.57234.merged.nearest, "grp")
+plot(points.pixley.57234)
+
+
+points.kernNW.merged = merge(points.kernNW.gpx@data, df.kern.alltags.56719, "tmp") 
+points.kernNW.merged.nearest = points.kernNW.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.kernNW = merge(points.kernNW.gpx, points.kernNW.merged.nearest, "grp")
+plot(points.kernNW)
+
+points.kernNWR.merged = merge(points.kernNWR.gpx@data, df.kern.alltags.56719, "tmp") 
+points.kernNWR.merged.nearest = points.kernNWR.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.kernNWR = merge(points.kernNWR.gpx, points.kernNWR.merged.nearest, "grp")
+plot(points.kernNWR)
+
+points.cosumnes.57234.merged = merge(points.cosumnes.gpx@data, df.cosumnes.alltags.57234, "tmp") 
+points.cosumnes.57234.merged.nearest = points.cosumnes.57234.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.cosumnes.57234 = merge(points.cosumnes.gpx, points.cosumnes.57234.merged.nearest, "grp")
+plot(points.cosumnes.57234)
+
+points.cosumnes.58286.merged = merge(points.cosumnes.gpx@data, df.cosumnes.alltags.58286, "tmp") 
+points.cosumnes.58286.merged.nearest = points.cosumnes.58286.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.cosumnes.58286 = merge(points.cosumnes.gpx, points.cosumnes.58286.merged.nearest, "grp")
+plot(points.cosumnes.58286)
+
+points.colusa.58286.merged = merge(points.colusa.gpx@data, df.colusa.alltags.58286, "tmp") 
+points.colusa.58286.merged.nearest = points.colusa.58286.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.colusa.58286 = merge(points.colusa.gpx, points.colusa.58286.merged.nearest, "grp")
+plot(points.colusa.58286)
+
+points.birdhaven.58286.merged = merge(points.birdhaven.gpx@data, df.birdhaven.alltags.58286, "tmp") 
+points.birdhaven.58286.merged.nearest = points.birdhaven.58286.merged %>%
+  group_by(grp) %>% 
+  slice(which.min(abs(difftime(timestamp, ts)))) %>% 
+  ungroup() %>% 
+  select(-c(tmp, track_fid, track_seg_id, time, "magvar", "geoidheight", "name", 
+            "cmt", "desc", "src", "link1_href", "link1_text", "link1_type", 
+            "link2_href", "link2_text", "link2_type", "sym", "type", "fix" , 
+            "sat", "hdop", "vdop", "pdop" , "ageofdgpsdata" , "dgpsid", ts, 
+            tsCorrected, sigsd, noise, freq, freqsd, slop, burstSlop, tagProjID, 
+            mfgID, tagType, codeSet, mfg, tagModel, tagLifespan, nomFreq, tagBI, 
+            pulseLen, tagDeployID, speciesID, markerNumber, markerType , 
+            tagDeployStart, tagDeployEnd, tagDepLat, tagDepLon, tagDepAlt, 
+            tagDepComments, tagDeployTest, fullID))
+points.birdhaven.58286 = merge(points.birdhaven.gpx, points.birdhaven.58286.merged.nearest, "grp")
+plot(points.birdhaven.58286)
 
 ```
 ## Leaflet map to examine data
 
 ```{r maptesttag}
+# install.packages("leaflet.extras2", "geojsonsf")
 library(leaflet)
+library(leaflet.extras2)
+library(sf)
+library(geojsonsf)
 
+# Napa-Sonoma
 pal <- colorNumeric(
   palette = "Reds",
   domain = points$sig)
 
-icons <- awesomeIcons(
-  icon = 'color-wand-outline',#'ios-close' 'wifi-sharp'
-  iconColor = 'black',
-  library = 'ion',
-  markerColor = ifelse(is.na(points$sig),"#d9d9d9",pal(points$sig))
-)
-
-
 leaflet(points) %>%
-  addTiles(group ="OSM (default)") %>%
-  addProviderTiles('Esri.WorldImagery', group = "World Imagery") %>%
-  # addMarkers()
-  # This only produced one color
-  # addAwesomeMarkers(icon=icons, label=~as.character(sig))
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
   addCircleMarkers(color = ifelse(is.na(points$sig),"#737373",pal(points$sig)),
                    radius = ifelse(is.na(points$sig), 2, 10),
                    popup = ~as.character(points$sig), 
-                   label = ~as.character(points$sig),
-                   group = "Signal Strength") %>%
-  addLayersControl(
-    baseGroups = c("OSM (default)", "World Imagery"),
-    overlayGroups = c("Signal Strength"),
-    options = layersControlOptions(collapsed = FALSE))
-
-pal <- colorNumeric(
+                   label = ~as.character(points$sig))
+# Pixley
+pal1 <- colorNumeric(
   palette = "Reds",
-  domain = points.pixley$sig)
+  domain = points.pixley.57234$sig)
+pal2 <- colorNumeric(
+  palette = "Blues",
+  domain = points.pixley.56719$sig)
 
-icons <- awesomeIcons(
-  icon = 'color-wand-outline',#'ios-close' 'wifi-sharp'
-  iconColor = 'black',
-  library = 'ion',
-  markerColor = ifelse(is.na(points.pixley$sig),"#d9d9d9",pal(points.pixley$sig))
-)
-
-
-leaflet(points.pixley) %>%
-  addTiles() %>%
-  addProviderTiles('Esri.WorldImagery') %>%
+leaflet(points.pixley.57234) %>%
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
   # addMarkers()
   # This only produced one color
   # addAwesomeMarkers(icon=icons, label=~as.character(sig))
-  addCircleMarkers(color = ifelse(is.na(points.pixley$sig),"#737373",pal(points.pixley$sig)),
-                   radius = ifelse(is.na(points.pixley$sig), 2, 10),
-                   popup = ~as.character(points.pixley$sig), 
-                   label = ~as.character(points.pixley$sig))
+  addCircleMarkers(color = ifelse(is.na(points.pixley.57234$sig),"#737373",pal1(points.pixley.57234$sig)),
+                   radius = ifelse(is.na(points.pixley.57234$sig), 2, 10),
+                   popup = ~as.character(points.pixley.57234$sig), 
+                   label = ~as.character(points.pixley.57234$sig),
+                   group = "LifeTag 57234 on window") %>%
+  addCircleMarkers(color = ifelse(is.na(points.pixley.56719$sig),"#737373",pal2(points.pixley.56719$sig)),
+                   radius = ifelse(is.na(points.pixley.56719$sig), 2, 10),
+                   popup = ~as.character(points.pixley.56719$sig), 
+                   label = ~as.character(points.pixley.56719$sig),
+                   group = "LifeTag 56719 on aerial") %>%
+  addLayersControl(
+        baseGroups = c("OSM (default)", "Esri World Imagery"),
+        overlayGroups = c("LifeTag 57234 on window", "LifeTag 56719 on aerial"),
+        position = "bottomright",
+        options = layersControlOptions(collapsed = TRUE))
+
+  
+# Kern NWR
+pal <- colorNumeric(
+  palette = "Reds",
+  domain = points.kernNWR$sig)
+
+leaflet(points.kernNWR) %>% # points.kernNW
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
+  addCircleMarkers(color = ifelse(is.na(points.kernNWR$sig),"#737373",pal(points.kernNWR$sig)),
+                   radius = ifelse(is.na(points.kernNWR$sig), 2, 10),
+                   popup = ~as.character(points.kernNWR$sig), 
+                   label = ~as.character(points.kernNWR$sig),
+                   group = "Kern NWR") %>%
+  # There appear to be no signals for this visit.
+  # addCircleMarkers(color = ifelse(is.na(points.kernNW$sig),"#737373",pal(points.kernNW$sig)),
+  #                  radius = ifelse(is.na(points.kernNW$sig), 2, 10),
+  #                  popup = ~as.character(points.kernNW$sig), 
+  #                  label = ~as.character(points.kernNW$sig),
+  #                  group = "Kern NW") %>%
+  addLayersControl(
+        baseGroups = c("OSM (default)", "Esri World Imagery"),
+        # overlayGroups = c("Kern NWR", "Kern NW"),
+        position = "bottomright",
+        options = layersControlOptions(collapsed = TRUE))
+
+# Cosumnes
+pal1 <- colorNumeric(
+  palette = "Reds",
+  domain = points.cosumnes.57234$sig)
+pal2 <- colorNumeric(
+  palette = "Blues",
+  domain = points.cosumnes.58286$sig)
+
+leaflet(points.cosumnes.57234) %>%
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
+  # addMarkers()
+  # This only produced one color
+  # addAwesomeMarkers(icon=icons, label=~as.character(sig))
+  addCircleMarkers(color = ifelse(is.na(points.cosumnes.57234$sig),"#737373",pal1(points.cosumnes.57234$sig)),
+                   radius = ifelse(is.na(points.cosumnes.57234$sig), 2, 10),
+                   popup = ~as.character(points.cosumnes.57234$sig), 
+                   label = ~as.character(points.cosumnes.57234$sig),
+                   group = "LifeTag 57234 on 2m PVC") %>%
+  addCircleMarkers(color = ifelse(is.na(points.cosumnes.58286$sig),"#737373",pal2(points.cosumnes.58286$sig)),
+                   radius = ifelse(is.na(points.cosumnes.58286$sig), 2, 10),
+                   popup = ~as.character(points.cosumnes.58286$sig), 
+                   label = ~as.character(points.cosumnes.58286$sig),
+                   group = "HybridTag 58286 on 2m PVC") %>%
+  addLayersControl(
+        baseGroups = c("OSM (default)", "Esri World Imagery"),
+        overlayGroups = c("LifeTag 57234 on 2m PVC", "HybridTag 58286 on 2m PVC"),
+        position = "bottomright",
+        options = layersControlOptions(collapsed = TRUE))
+  
+# Colusa
+pal <- colorNumeric(
+  palette = "Reds",
+  domain = points.colusa.58286$sig)
+
+leaflet(points.colusa.58286) %>%
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
+  addCircleMarkers(color = ifelse(is.na(points.colusa.58286$sig),"#737373",pal(points.colusa.58286$sig)),
+                   radius = ifelse(is.na(points.colusa.58286$sig), 2, 10),
+                   popup = ~as.character(points.colusa.58286$sig), 
+                   label = ~as.character(points.colusa.58286$sig)) %>%
+  addLayersControl(
+        baseGroups = c("OSM (default)", "Esri World Imagery"),
+        position = "bottomright",
+        options = layersControlOptions(collapsed = TRUE))
+
+# Birdhaven
+pal <- colorNumeric(
+  palette = "Reds",
+  domain = points.birdhaven.58286$sig)
+
+leaflet(points.birdhaven.58286) %>%
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
+  addCircleMarkers(color = ifelse(is.na(points.birdhaven.58286$sig),"#737373",pal(points.birdhaven.58286$sig)),
+                   radius = ifelse(is.na(points.birdhaven.58286$sig), 2, 10),
+                   popup = ~as.character(points.birdhaven.58286$sig), 
+                   label = ~as.character(points.birdhaven.58286$sig)) %>%
+  addLayersControl(
+        baseGroups = c("OSM (default)", "Esri World Imagery"),
+        position = "bottomright",
+        options = layersControlOptions(collapsed = TRUE))
+
 
 ```
 
