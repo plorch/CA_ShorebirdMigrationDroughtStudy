@@ -41,6 +41,8 @@ vignettes/*.pdf
 
 # Output files
 /Output
+*.pdf
+*.html
 
 # Input files for testing (mostly kmls)
 /TagTesting
