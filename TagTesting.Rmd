@@ -32,11 +32,41 @@ options(timeout = max(1000, getOption("timeout")))
 ## Set receiver and file paths for a given map
 
 ```{r set}
-rec_id = "CTT-140682CCEB52"
-
-GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
-gpx_layer = "track_points"
+# Pixley
+rec_id =  "CTT-140682CCEB52" 
 tag_motus_id = 57234
+GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
+
+rec_id =  "CTT-140682CCEB52" 
+tag_motus_id = 56719
+GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
+
+# Kern
+rec_id =  "CTT-8F11AA6622E1" 
+tag_motus_id = 56719
+GPS_filepath = "TagTesting/Kern NWR Test.gpx"
+
+# Cosomnes
+rec_id =  "CTT-D00F694B4918" 
+tag_motus_id = 57234
+GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
+
+rec_id =  "CTT-D00F694B4918" 
+tag_motus_id = 58286
+GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
+
+# Colusa
+rec_id =  "CTT-9697596E76D6" 
+tag_motus_id = 58286
+GPS_filepath = "TagTesting/Colusa Motus Test 81822.gpx"
+
+# Birdhaven
+rec_id =  # "CTT-140682CCEB52" 
+tag_motus_id = 58286
+GPS_filepath = "TagTesting/BirdHaven Motus Test 81822.gpx"
+
+gpx_layer = "track_points"
+p_cex = 10 # Point size multiplier
 
 ```
 
@@ -119,6 +149,10 @@ df.rec_tags = df.alltags %>%
   filter(motusTagID == tag_motus_id,
          ts >= time_range[1],
          ts <= time_range[2])
+# Create scaling factor for later (between 0-1)
+df.rec_tags$sig_scaled = (df.rec_tags$sig
+  - max(df.rec_tags$sig)) / 
+  (max(df.rec_tags$sig) - min(df.rec_tags$sig))
 
 rec_tags.sig  = df.rec_tags %>% 
   ggplot(aes(x = ts, y = sig, col = as.factor(antBearing))) +
@@ -155,10 +189,10 @@ tags_points.nearest = tags_points_l_joined %>%
   slice(which.min(abs(difftime(timestamp, ts)))) %>% 
   ungroup() %>% 
   select("track_seg_point_id", "ele", "timestamp", "grp", "hitID", "runID",
-         "batchID", "sig", "done", "motusTagID", "ambigID", "port", "nodeNum",
-         "runLen", "motusFilter", "bootnum", "deviceID", "recvDeployID",
-         "recvDeployLat", "recvDeployLon", "recvDeployAlt", "recv", 
-         "recvDeployName" , "recvSiteName", "isRecvMobile", "recvProjID",
+         "batchID", "sig", "sig_scaled", "done", "motusTagID", "ambigID", 
+         "port", "nodeNum", "runLen", "motusFilter", "bootnum", "deviceID", 
+         "recvDeployID", "recvDeployLat", "recvDeployLon", "recvDeployAlt", 
+         "recv", "recvDeployName" , "recvSiteName", "isRecvMobile", "recvProjID",
          "recvUtcOffset", "antType", "antBearing", "antHeight", "speciesEN",
          "speciesFR", "speciesSci", "speciesGroup", "tagProjName" , 
          "recvProjName")
@@ -191,8 +225,7 @@ m = leaflet(points) %>%
   addTiles(group = "OSM (default)") %>%
   addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
   addCircleMarkers(color = pal(points$sig),
-                   radius = ifelse(is.na(points$sig), 2, 
-                                   -(points$sig - max(na.omit(points$sig)))),
+                   radius = ifelse(is.na(points$sig_scaled), 2, -(p_cex * points$sig_scaled)),
                    popup = ~paste(as.character(points$sig),
                                   as.character(points$motusTagID), sep = "; "), 
                    label = ~paste(as.character(points$sig),
@@ -206,6 +239,7 @@ m = leaflet(points) %>%
     position = c("bottomleft"),
     options = scaleBarOptions()
   )
+m
 saveWidget(m, file = 
              paste(df.rec_tags$recvSiteName[1], 
                    as.character(tag_motus_id), 
