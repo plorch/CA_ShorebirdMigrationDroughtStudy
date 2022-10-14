@@ -552,10 +552,12 @@ plot(points.birdhaven.58286)
 
 ```{r maptesttag}
 # install.packages("leaflet.extras2", "geojsonsf")
+library(dplyr)
 library(leaflet)
 library(leaflet.extras2)
 library(sf)
 library(geojsonsf)
+library(plotrix)
 
 # Napa-Sonoma
 pal <- colorNumeric(
@@ -568,7 +570,12 @@ leaflet(points) %>%
   addCircleMarkers(color = ifelse(is.na(points$sig),"#737373",pal(points$sig)),
                    radius = ifelse(is.na(points$sig), 2, 10),
                    popup = ~as.character(points$sig), 
-                   label = ~as.character(points$sig))
+                   label = ~as.character(points$sig)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions()
+  )
+
 # Pixley
 pal1 <- colorNumeric(
   palette = "Reds",
@@ -597,9 +604,12 @@ leaflet(points.pixley.57234) %>%
         baseGroups = c("OSM (default)", "Esri World Imagery"),
         overlayGroups = c("LifeTag 57234 on window", "LifeTag 56719 on aerial"),
         position = "bottomright",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions())
 
-  
+
 # Kern NWR
 pal <- colorNumeric(
   palette = "Reds",
@@ -623,7 +633,11 @@ leaflet(points.kernNWR) %>% # points.kernNW
         baseGroups = c("OSM (default)", "Esri World Imagery"),
         # overlayGroups = c("Kern NWR", "Kern NW"),
         position = "bottomright",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions()
+)
 
 # Cosumnes
 pal1 <- colorNumeric(
@@ -653,7 +667,11 @@ leaflet(points.cosumnes.57234) %>%
         baseGroups = c("OSM (default)", "Esri World Imagery"),
         overlayGroups = c("LifeTag 57234 on 2m PVC", "HybridTag 58286 on 2m PVC"),
         position = "bottomright",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions()
+  )
   
 # Colusa
 pal <- colorNumeric(
@@ -670,7 +688,11 @@ leaflet(points.colusa.58286) %>%
   addLayersControl(
         baseGroups = c("OSM (default)", "Esri World Imagery"),
         position = "bottomright",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions()
+)
 
 # Birdhaven
 pal <- colorNumeric(
@@ -687,7 +709,11 @@ leaflet(points.birdhaven.58286) %>%
   addLayersControl(
         baseGroups = c("OSM (default)", "Esri World Imagery"),
         position = "bottomright",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE)) %>%
+  addScaleBar(
+    position = c("bottomleft"),
+    options = scaleBarOptions()
+)
 
 
 ```
