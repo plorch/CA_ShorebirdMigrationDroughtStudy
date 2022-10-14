@@ -31,37 +31,43 @@ options(timeout = max(1000, getOption("timeout")))
 
 ## Set receiver and file paths for a given map
 
+The way this is set up, you set up receiver, tag, .gpx combos, then comment out 
+all but one and run.
+
+You can knit this in Rstudio to produce a report for each combo that shows 
+diagnostics.
+
 ```{r set}
 # Pixley
-rec_id =  "CTT-140682CCEB52" 
-tag_motus_id = 57234
-GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
+# rec_id =  "CTT-140682CCEB52" 
+# tag_motus_id = 57234
+# GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
 
-rec_id =  "CTT-140682CCEB52" 
-tag_motus_id = 56719
-GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
+# rec_id =  "CTT-140682CCEB52" 
+# tag_motus_id = 56719
+# GPS_filepath = "TagTesting/PixleyTrackCaltopo.gpx"
 
 # Kern
-rec_id =  "CTT-8F11AA6622E1" 
-tag_motus_id = 56719
-GPS_filepath = "TagTesting/Kern NWR Test.gpx"
+# rec_id =  "CTT-8F11AA6622E1" 
+# tag_motus_id = 56719
+# GPS_filepath = "TagTesting/Kern NWR Test.gpx"
 
 # Cosomnes
-rec_id =  "CTT-D00F694B4918" 
-tag_motus_id = 57234
-GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
+# rec_id =  "CTT-D00F694B4918"
+# tag_motus_id = 57234
+# GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
 
-rec_id =  "CTT-D00F694B4918" 
-tag_motus_id = 58286
-GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
+# rec_id =  "CTT-D00F694B4918"
+# tag_motus_id = 58286
+# GPS_filepath = "TagTesting/Cosumnes Track 72722.gpx"
 
 # Colusa
-rec_id =  "CTT-9697596E76D6" 
-tag_motus_id = 58286
-GPS_filepath = "TagTesting/Colusa Motus Test 81822.gpx"
+# rec_id =  "CTT-9697596E76D6"
+# tag_motus_id = 58286
+# GPS_filepath = "TagTesting/Colusa Motus Test 81822.gpx"
 
 # Birdhaven
-rec_id =  # "CTT-140682CCEB52" 
+rec_id =  "CTT-F51A7C862D57"
 tag_motus_id = 58286
 GPS_filepath = "TagTesting/BirdHaven Motus Test 81822.gpx"
 
