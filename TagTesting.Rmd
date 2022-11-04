@@ -67,12 +67,36 @@ diagnostics.
 # GPS_filepath = "TagTesting/Colusa Motus Test 81822.gpx"
 
 # Birdhaven
-rec_id =  "CTT-F51A7C862D57"
-tag_motus_id = 58286
-GPS_filepath = "TagTesting/BirdHaven Motus Test 81822.gpx"
+# rec_id =  "CTT-F51A7C862D57"
+# tag_motus_id = 58286
+# GPS_filepath = "TagTesting/BirdHaven Motus Test 81822.gpx"
+
+# gpx_layer = "track_points"
+# p_cex = 10 # Point size multiplier
+
+# Elkhorn slough
+## Levi's test tag
+rec_id =  "CTT-3D35D88BF546"
+tag_motus_id = 49052
+GPS_filepath = "TagTesting/Elkhorn Slough/October 13 track.gpx"
+station_coords = data.frame(longitude = -121.7362, latitude = 36.8186)
+coordinates(station_coords) = ~ longitude + latitude
+proj4string(station_coords) = proj4string(points)
+# How many rings showing distance from tower do you want
+km_rings = 4
+
+## Pelican leg tag
+tag_motus_id = 61214
+GPS_filepath = "TagTesting/Elkhorn Slough/October 13 track.gpx"
+station_coords = data.frame(longitude = -121.7362, latitude = 36.8186)
+coordinates(station_coords) = ~ longitude + latitude
+proj4string(station_coords) = proj4string(points)
+# How many rings showing distance from tower do you want
+km_rings = 4
 
 gpx_layer = "track_points"
 p_cex = 10 # Point size multiplier
+
 
 ```
 
@@ -101,7 +125,7 @@ Sys.setenv(TZ = "UTC")
 # To update the .motus SQLite file, use this
 # rec.motus = tagme(rec_id, new=F, update = T)
 
-# To just connect and use the current .motus SQLite fiels use this
+# To just connect and use the current .motus SQLite files use this
 rec.motus = tagme(rec_id, new=F, update = F)
 
 # Get link to table
@@ -130,14 +154,23 @@ library(lubridate)
 library(ggplot2)
 library(dplyr)
 library(motus)
+library(sp)
+
+# Check structure of .gpx file (different between devices)
+ogrListLayers(GPS_filepath)
 
 # Read in GPS points from route in .gpx format
 points = readOGR(GPS_filepath, gpx_layer)
+# This step can be commented out if just GPS track of interest was exported
+# Subset just one track segment for the trip of interest
+#  Don't use date to subset, due to UTC being a day ahead during some of track
+points = points[points@data$track_fid == 63,]
 
 # Create datetime from end and store in blank timestamp field and show range
 # Assumes this file is already trimmed to roughly the test period
 points@data = points@data %>%
   mutate(timestamp = as_datetime(time, tz = "UTC"))
+
 (time_range = range(points@data$timestamp))
 
 ```
@@ -230,6 +263,9 @@ pal <- colorNumeric(
 m = leaflet(points) %>%
   addTiles(group = "OSM (default)") %>%
   addProviderTiles('Esri.WorldImagery',group = "Esri World Imagery") %>%
+  addCircles(data = station_coords, color = "green", 
+             radius = seq(1, km_rings)*1000,
+             fillColor = "transparent") %>%
   addCircleMarkers(color = pal(points$sig),
                    radius = ifelse(is.na(points$sig_scaled), 2, -(p_cex * points$sig_scaled)),
                    popup = ~paste(as.character(points$sig),
@@ -247,8 +283,10 @@ m = leaflet(points) %>%
   )
 m
 saveWidget(m, file = 
-             paste(df.rec_tags$recvSiteName[1], 
+             # paste(df.rec_tags$recvSiteName[1], 
+             paste(df.rec_tags$recvDeployName[1], 
                    as.character(tag_motus_id), 
+                   as.character(as.Date(df.rec_tags$ts[1])),
                    "html", 
                    sep = "."))
 ```
